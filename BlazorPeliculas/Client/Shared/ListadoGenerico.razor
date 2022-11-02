@@ -1,0 +1,39 @@
+﻿@typeparam Titem
+
+@if (Listado == null)
+{
+    @if (Cargando == null)
+    {
+        <text>Cargando... </text>
+    }
+    else
+    {
+        @Cargando
+    }
+
+}
+else if (Listado.Count == 0)
+{
+    @if (NoHayRegistro == null)
+    {
+        <text>No Hay registros para mostrar... </text>
+    }
+    else
+    {
+        @NoHayRegistro
+    }
+}
+else
+{
+    foreach (var elemento in Listado)
+    {
+        @HayRegistro(elemento)
+    }
+}
+
+@code {
+    [Parameter] public RenderFragment Cargando { get; set; }
+    [Parameter] public RenderFragment NoHayRegistro { get; set; }
+    [Parameter] public RenderFragment<Titem> HayRegistro { get; set; }
+    [Parameter] public List<Titem> Listado { get; set; }
+}

@@ -1,0 +1,29 @@
+﻿@page "/"
+@inject ServiciosSingleton singleton
+@inject IRepositoriocs repositorio
+
+<div>
+    <h3>Peliculas</h3>
+    <ListadoPeliculas  Peliculas="Peliculas" />
+</div>
+
+<p>singleton count: @singleton.Valor</p>
+
+<button @onclick="AgregarPelicula"> </button>
+
+@code {
+    string nombre = "Gregor";
+
+    public List<Pelicula> Peliculas;
+
+    protected override void OnInitialized()
+    {
+        Peliculas = repositorio.ObtenerPeliculas();
+    }
+
+    void AgregarPelicula()
+    {
+        Peliculas.Add(new Pelicula() { Titulo = "Nueva", Lanzamiento = DateTime.Today });
+    }
+
+}
