@@ -10,20 +10,20 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                <th></th>
-                <th>Nombre</th>
+                    <th></th>
+                    <th>Nombre</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Generos)
                 {
-                                    <tr>
-                                        <td>
-                                            <a class="btn btn-success">Editar</a>
-                                            <button class="btn ">Borrar</button>
-                                        </td>
-                                        <td>@item.Nombre</td>
-                                    </tr>
+                    <tr>
+                        <td>
+                            <a class="btn btn-success">Editar</a>
+                            <button class="btn ">Borrar</button>
+                        </td>
+                        <td>@item.Nombre</td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -35,8 +35,13 @@
 
     protected async override Task OnInitializedAsync()
     {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
         var responseHttp = await repositorio.Get<List<Genero>>("api/generos");
-        Generos = responseHttp.Response;
+        Generos = responseHttp.Response.ToList();
     }
 
 }
