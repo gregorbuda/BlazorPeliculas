@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BlazorPeliculas.Server.Helpers;
 using BlazorPeliculas.Shared.Entidades;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,15 +15,15 @@ namespace BlazorPeliculas.Server.Controllers
     public class PersonasController : ControllerBase
     {
         private readonly ApplicationDbContext context;
-        //private readonly IAlmacenadorArchivos almacenadorDeArchivos;
+        private readonly IAlmacenadorDeArchivos almacenadorDeArchivos;
         //private readonly IMapper mapper;
 
-        public PersonasController(ApplicationDbContext context)
-        //    //IAlmacenadorArchivos almacenadorDeArchivos,
+        public PersonasController(ApplicationDbContext context,
+        IAlmacenadorDeArchivos almacenadorDeArchivos)
         //    IMapper mapper)
         {
             this.context = context;
-            //this.almacenadorDeArchivos = almacenadorDeArchivos;
+            this.almacenadorDeArchivos = almacenadorDeArchivos;
             //this.mapper = mapper;
         }
 
@@ -53,27 +54,27 @@ namespace BlazorPeliculas.Server.Controllers
                 .Where(x => x.Nombre.ToLower().Contains(textoBusqueda)).ToListAsync();
         }
 
-        //[HttpPost]
-        //public async Task<ActionResult<int>> Post(Persona persona)
-        //{
-        //    if (!string.IsNullOrWhiteSpace(persona.Foto))
-        //    {
-        //        var fotoPersona = Convert.FromBase64String(persona.Foto);
-        //        persona.Foto = await almacenadorDeArchivos.GuardarArchivo(fotoPersona, "jpg", "personas");
-        //    }
-
-        //    context.Add(persona);
-        //    await context.SaveChangesAsync();
-        //    return persona.Id;
-        //}
-
         [HttpPost]
         public async Task<ActionResult<int>> Post(Persona persona)
         {
+            if (!string.IsNullOrWhiteSpace(persona.Foto))
+            {
+                var fotoPersona = Convert.FromBase64String(persona.Foto);
+                persona.Foto = await almacenadorDeArchivos.GuardarArchivo(fotoPersona, "jpg", "wwwroot/personas");
+            }
+
             context.Add(persona);
             await context.SaveChangesAsync();
             return persona.Id;
         }
+
+        //[HttpPost]
+        //public async Task<ActionResult<int>> Post(Persona persona)
+        //{
+        //    context.Add(persona);
+        //    await context.SaveChangesAsync();
+        //    return persona.Id;
+        //}
 
         //[HttpPut]
         //public async Task<ActionResult> Put(Persona persona)
