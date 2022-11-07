@@ -1,3 +1,4 @@
+using BlazorPeliculas.Client.Helpers;
 using BlazorPeliculas.Client.Repositorios;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -27,9 +28,8 @@ namespace BlazorPeliculas.Client
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ServiciosSingleton>();
-            services.AddTransient<ServiciosTransient>();
-            services.AddSingleton<IRepositoriocs,Repositorio>();
+            services.AddScoped<IRepositoriocs,Repositorio>();
+            services.AddScoped<IMostrarMensajes, MostrarMensajes>();
         }
     }
 }
