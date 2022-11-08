@@ -1,4 +1,6 @@
-﻿   <EditForm Model="Pelicula" OnValidSubmit="OnDataAnnotationsValidated">
+﻿   @inject IRepositoriocs repositorio
+
+<EditForm Model="Pelicula" OnValidSubmit="OnDataAnnotationsValidated">
         <DataAnnotationsValidator />
         <div class="form-group">
             <label>Título:</label>
@@ -92,11 +94,8 @@
 
     private async Task<IEnumerable<Persona>> BuscarActores(string searchText)
     {
-        return new List<Persona>()
-        {
-            new Persona(){Id=1, Nombre="Tom Holland", Foto = "https://m.media-amazon.com/images/M/MV5BNTAzMzA3NjQwOF5BMl5BanBnXkFtZTgwMDUzODQ5MTI@._V1_UY317_CR23,0,214,317_AL_.jpg"},
-            new Persona(){Id=2, Nombre="Tom Hanks", Foto = "https://m.media-amazon.com/images/M/MV5BMTQ2MjMwNDA3Nl5BMl5BanBnXkFtZTcwMTA2NDY3NQ@@._V1_UY317_CR2,0,214,317_AL_.jpg"}
-        };
+        var responseHttp = await repositorio.Get<List<Persona>>($"api/personas/buscar/{searchText}");
+        return responseHttp.Response.ToList();
     }
 
     private async Task OnDataAnnotationsValidated()

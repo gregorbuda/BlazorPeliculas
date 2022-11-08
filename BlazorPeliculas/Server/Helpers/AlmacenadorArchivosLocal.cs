@@ -30,7 +30,7 @@ namespace BlazorPeliculas.Server.Helpers
         public Task EliminarArchivo(string ruta, string nombreContenedor)
         {
             var filename = Path.GetFileName(ruta);
-            string directorioArchivo = Path.Combine(env.ContentRootPath, nombreContenedor, filename);
+            string directorioArchivo = Path.Combine(env.WebRootPath, nombreContenedor, filename);
             if (File.Exists(directorioArchivo))
             {
                 File.Delete(directorioArchivo);
@@ -42,7 +42,7 @@ namespace BlazorPeliculas.Server.Helpers
         public async Task<string> GuardarArchivo(byte[] contenido, string extension, string nombreContenedor)
         {
             var filename = $"{Guid.NewGuid()}.{extension}";
-            string folder = Path.Combine(env.ContentRootPath, nombreContenedor);
+            string folder = Path.Combine(env.WebRootPath, nombreContenedor);
 
             if (!Directory.Exists(folder))
             {

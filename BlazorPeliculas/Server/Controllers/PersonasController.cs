@@ -35,6 +35,12 @@ namespace BlazorPeliculas.Server.Controllers
         //    return await queryable.Paginar(paginacion).ToListAsync();
         //}
 
+        [HttpGet]
+        public async Task<ActionResult<List<Persona>>> Get()
+        {
+            return await context.persona.ToListAsync();
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Persona>> Get(int id)
         {
