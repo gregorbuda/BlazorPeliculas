@@ -25,7 +25,11 @@ namespace BlazorPeliculas.Shared.Entidades
 
         public List<GeneroPelicula> GenerosPelicula { get; set; } = new List<GeneroPelicula>();
 
+        public List<CinesPeliculas> CinePelicula { get; set; } = new List<CinesPeliculas>();
+
         public List<PeliculaActor> peliculaActor { get; set; }
+
+        public List<Cine> cines { get; set; }
 
         public string TituloCortado 
         { 

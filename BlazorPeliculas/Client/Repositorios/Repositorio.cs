@@ -19,7 +19,7 @@ namespace BlazorPeliculas.Client.Repositorios
 
         private JsonSerializerOptions OpcionesPorDefectoJSON => new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
 
-        public async Task<HttpResponseWrapper<T>> Get<T>(string url)
+        async Task<HttpResponseWrapper<T>> IRepositoriocs.Get<T>(string url)
         {
             var responseHttp = await _httpClient.GetAsync(url);
 
@@ -38,7 +38,35 @@ namespace BlazorPeliculas.Client.Repositorios
             }
         }
 
-        public async Task<HttpResponseWrapper<object>> Post<T>(string url,
+        async Task<HttpResponseWrapper<T>> IRepositoriocs.GetData<T>(string url)
+        {
+            var responseHttp = await _httpClient.GetAsync(url);
+
+            if (responseHttp.IsSuccessStatusCode)
+            {
+                var response = await DeserializarRespuesta<T>(responseHttp, OpcionesPorDefectoJSON);
+
+                var respuesta = new HttpResponseWrapper<T>(response, false, responseHttp);
+                return respuesta;
+
+            }
+            else
+            {
+                var respuesta = new HttpResponseWrapper<T>(default, true, responseHttp);
+                return respuesta;
+            }
+        }
+
+        async Task<HttpResponseWrapper<object>> IRepositoriocs.Put<T>(string url, T enviar)
+        {
+            var enviarJSON = JsonSerializer.Serialize(enviar);
+            var enviarContent = new StringContent(enviarJSON, Encoding.UTF8, "application/json");
+            var responseHttp = await _httpClient.PutAsync(url, enviarContent);
+            return new HttpResponseWrapper<object>(null, !responseHttp.IsSuccessStatusCode, responseHttp);
+        }
+
+
+        async Task<HttpResponseWrapper<object>> IRepositoriocs.Post<T>(string url,
             T enviar)
         {
             var enviarJSON = JsonSerializer.Serialize(enviar);
@@ -47,7 +75,7 @@ namespace BlazorPeliculas.Client.Repositorios
             return new HttpResponseWrapper<object>(null, !responseHttp.IsSuccessStatusCode, responseHttp);
         }
 
-        public async Task<HttpResponseWrapper<TResponse>> Post<T, TResponse>(string url,
+        async Task<HttpResponseWrapper<TResponse>> IRepositoriocs.Post<T, TResponse>(string url,
     T enviar)
         {
             var enviarJSON = JsonSerializer.Serialize(enviar);
@@ -70,7 +98,14 @@ namespace BlazorPeliculas.Client.Repositorios
             return JsonSerializer.Deserialize<T>(responseString, jsonSerializerOptions);
         }
 
-        public List<Pelicula> ObtenerPeliculas()
+        async Task<HttpResponseWrapper<object>> IRepositoriocs.Delete(string url)
+        {
+            var responseHTTP = await _httpClient.DeleteAsync(url);
+            return new HttpResponseWrapper<object>(null, !responseHTTP.IsSuccessStatusCode, responseHTTP);
+        }
+
+
+        List<Pelicula> IRepositoriocs.ObtenerPeliculas()
         {
             return new List<Pelicula>()
         {

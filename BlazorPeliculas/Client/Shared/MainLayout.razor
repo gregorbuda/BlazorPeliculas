@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@inject BlazorPeliculas.Client.Auth.RenovadorToken renovadorToken
+@inject IJSRuntime js
+@inject NavigationManager navigationManager
 
 <div class="page">
     <div class="sidebar">
@@ -7,6 +10,8 @@
 
     <div class="main">
         <div class="top-row px-4">
+            <EnlacesLogin />
+
             <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
         </div>
 
@@ -15,3 +20,26 @@
         </div>
     </div>
 </div>
+
+@code {
+
+    [CascadingParameter] public Task<AuthenticationState> AuthenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await js.InicializarTimerInactivo(DotNetObjectReference.Create(this));
+        renovadorToken.Iniciar();
+    }
+
+    [JSInvokable]
+    public async Task Logout()
+    {
+        var authState = await AuthenticationState;
+        if (authState.User.Identity.IsAuthenticated)
+        {
+            // Descomentar para activar deslogueo automático
+            navigationManager.NavigateTo("logout");
+        }
+    }
+
+}

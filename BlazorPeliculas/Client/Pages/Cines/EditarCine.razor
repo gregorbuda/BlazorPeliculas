@@ -1,0 +1,54 @@
+﻿@page "/cines/editar/{CineId:int}"
+@inject IRepositoriocs repositorio
+@inject IMostrarMensajes mostrarMensaje
+@inject NavigationManager navigationManager
+
+<h3>Editar Cine</h3>
+
+@if (Cine == null)
+{
+    <text>Cargando...</text>
+}
+else
+{
+    <FormularioCines OnValidSubmit="Editar" Cine="Cine" />
+}
+
+@code {
+    [Parameter] public int CineId { get; set; }
+    private Cine Cine;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var httpResponse = await repositorio.GetData<Cine>($"api/cines/busqueda/{CineId}");
+
+        if (httpResponse.Error)
+        {
+            if (httpResponse.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("cines");
+            }
+            else
+            {
+                await mostrarMensaje.MostrarMensajesError(await httpResponse.GetBody());
+            }
+        }
+        else
+        {
+            Cine = httpResponse.Response;
+        }
+    }
+
+    private async Task Editar()
+    {
+        var httpResponse = await repositorio.Put("api/cines", Cine);
+        if (httpResponse.Error)
+        {
+            await mostrarMensaje.MostrarMensajesError(await httpResponse.GetBody());
+        }
+        else
+        {
+            navigationManager.NavigateTo("cines");
+        }
+    }
+}

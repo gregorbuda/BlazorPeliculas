@@ -1,4 +1,8 @@
-﻿using BlazorPeliculas.Shared.Entidades;
+﻿using BlazorPeliculas.Server.Helpers;
+using BlazorPeliculas.Shared.DTOs;
+using BlazorPeliculas.Shared.Entidades;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -8,6 +12,7 @@ namespace BlazorPeliculas.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+  
     public class GenerosController : ControllerBase
     {
         private readonly ApplicationDbContext context;
@@ -18,18 +23,21 @@ namespace BlazorPeliculas.Server.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<Genero>>> Get()
         {
             return await context.genero.ToListAsync();
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Genero>> Get(int id)
         {
             return await context.genero.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
         public async Task<ActionResult<int>> Post(Genero genero)
         {
             context.Add(genero);
@@ -38,6 +46,7 @@ namespace BlazorPeliculas.Server.Controllers
         }
 
         [HttpPut]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
         public async Task<ActionResult> Put(Genero genero)
         {
             context.Attach(genero).State = EntityState.Modified;
@@ -46,6 +55,7 @@ namespace BlazorPeliculas.Server.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
         public async Task<ActionResult> Delete(int id)
         {
             var existe = await context.genero.AnyAsync(x => x.Id == id);

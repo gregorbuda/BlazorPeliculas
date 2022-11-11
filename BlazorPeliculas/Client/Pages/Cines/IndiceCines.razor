@@ -1,0 +1,63 @@
+﻿@page "/cines"
+@inject IRepositoriocs repositorio
+@inject IMostrarMensajes mostrarMensajes
+<h3>Indice Cines</h3>
+
+<div class="form-group">
+    <a class="btn btn-info" href="/cines/crear"> Agregar Cines</a>
+</div>
+<ListadoGenerico Listado="Cine">
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Cine)
+                {
+                    <tr>
+                        <td>
+                            <a href="/cines/editar/@item.Id" class="btn btn-success">Editar</a>
+                        </td>
+                        <td>@item.Nombre</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+
+
+    public List<Cine> Cine { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        await Cargar();
+    }
+
+    private async Task Cargar()
+    {
+        var responseHttp = await repositorio.Get<List<Cine>>("api/cines");
+        Cine = responseHttp.Response;
+    }
+
+    private async Task BorrarGenero(Cine cine)
+    {
+        var responseHttp = await repositorio.Delete($"api/cines/{cine.Id}");
+        if (responseHttp.Error)
+        {
+            await mostrarMensajes.MostrarMensajesError(await responseHttp.GetBody());
+        }
+        else
+        {
+            await Cargar();
+        }
+
+    }
+
+
+}

@@ -42,7 +42,7 @@ namespace BlazorPeliculas.Server.Helpers
         public async Task<string> GuardarArchivo(byte[] contenido, string extension, string nombreContenedor)
         {
             var filename = $"{Guid.NewGuid()}.{extension}";
-            string folder = Path.Combine(env.WebRootPath, nombreContenedor);
+            string folder = Path.Combine(env.ContentRootPath);
 
             if (!Directory.Exists(folder))
             {
@@ -53,7 +53,7 @@ namespace BlazorPeliculas.Server.Helpers
             await File.WriteAllBytesAsync(rutaGuardado, contenido);
 
             var urlActual = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
-            var rutaParaBD = Path.Combine(urlActual, nombreContenedor, filename);
+            var rutaParaBD = Path.Combine(folder, nombreContenedor, filename);
             return rutaParaBD;
         }
     }

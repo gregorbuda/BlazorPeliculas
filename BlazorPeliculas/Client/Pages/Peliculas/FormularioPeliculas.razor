@@ -41,8 +41,8 @@
         <div class="form-group">
             <label>Géneros:</label>
             <div>
-                <SelectorMultiple Seleccionados="Seleccionados" 
-                                  NoSeleccionados="NoSeleccionados"></SelectorMultiple>
+                <SelectorMultiple Seleccionados="SeleccionadosGeneros" 
+                                  NoSeleccionados="NoSeleccionadosGeneros"></SelectorMultiple>
             </div>
         </div>
         <div class="form-group">
@@ -61,7 +61,15 @@
                 </SelectorMultipleTypeahead>
             </div>
         </div>
-
+        <div class="form-group">
+        <label>Cines:</label>
+            <div>
+                    
+         <SelectorMultiple Seleccionados="SeleccionadosCines" 
+                                  NoSeleccionados="NoSeleccionadosCines"></SelectorMultiple>
+ 
+            </div>
+        </div>
         <button type="submit" class="btn btn-success">Salvar Película</button>
     </EditForm>
 
@@ -71,15 +79,24 @@
     [Parameter] public List<Genero> GenerosSeleccionados { get; set; } = new List<Genero>();
     [Parameter] public List<Genero> GenerosNoSeleccionados { get; set; } = new List<Genero>();
     [Parameter] public List<Persona> ActoresSeleccionados { get; set; } = new List<Persona>();
+    [Parameter] public List<Cine> CinesSeleccionados { get; set; } = new List<Cine>();
+    [Parameter] public List<Cine> CinesNoSeleccionados { get; set; } = new List<Cine>();
 
-    private List<SelectorMultipleModel> Seleccionados { get; set; } = new List<SelectorMultipleModel>();
-    private List<SelectorMultipleModel> NoSeleccionados { get; set; } = new List<SelectorMultipleModel>();
+    private List<SelectorMultipleModel> SeleccionadosGeneros { get; set; } = new List<SelectorMultipleModel>();
+    private List<SelectorMultipleModel> NoSeleccionadosGeneros { get; set; } = new List<SelectorMultipleModel>();
+
+    private List<SelectorMultipleModel> SeleccionadosCines { get; set; } = new List<SelectorMultipleModel>();
+    private List<SelectorMultipleModel> NoSeleccionadosCines { get; set; } = new List<SelectorMultipleModel>();
     private string posterTemporal;
 
     protected override void OnInitialized()
     {
-        Seleccionados = GenerosSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
-        NoSeleccionados = GenerosNoSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
+        SeleccionadosGeneros = GenerosSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
+        NoSeleccionadosGeneros = GenerosNoSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
+
+        SeleccionadosCines = CinesSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
+        NoSeleccionadosCines = CinesNoSeleccionados.Select(x => new SelectorMultipleModel(x.Id.ToString(), x.Nombre)).ToList();
+
         if (!string.IsNullOrWhiteSpace(Pelicula.Poster))
         {
             posterTemporal = Pelicula.Poster;
@@ -94,19 +111,30 @@
 
     private async Task<IEnumerable<Persona>> BuscarActores(string searchText)
     {
-        var responseHttp = await repositorio.Get<List<Persona>>($"api/personas/buscar/{searchText}");
+      var responseHttp = await repositorio.Get<List<Persona>>($"api/personas/buscar/{searchText}");
+        return responseHttp.Response.ToList();
+    }
+
+    private async Task<IEnumerable<Cine>> BuscarCines(string searchText)
+    {
+        var responseHttp = await repositorio.Get<List<Cine>>($"api/cines/buscar/{searchText}");
         return responseHttp.Response.ToList();
     }
 
     private async Task OnDataAnnotationsValidated()
     {
-        Pelicula.GenerosPelicula = Seleccionados.Select(x => new GeneroPelicula
+        Pelicula.GenerosPelicula = SeleccionadosGeneros.Select(x => new GeneroPelicula
             {
                 GeneroId = int.Parse(x.Llave)
             }).ToList();
 
         Pelicula.peliculaActor = ActoresSeleccionados
         .Select(x => new PeliculaActor { PersonaId = x.Id, Personaje = x.Personaje }).ToList();
+
+        Pelicula.CinePelicula = SeleccionadosCines.Select(x => new CinesPeliculas
+            {
+                CinesId = int.Parse(x.Llave)
+            }).ToList();
 
         if (!string.IsNullOrWhiteSpace(Pelicula.Poster))
         {

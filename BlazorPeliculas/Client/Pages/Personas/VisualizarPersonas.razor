@@ -1,0 +1,53 @@
+﻿@page "/personas/{PersonaId:int}"
+@inject IRepositoriocs repositorio
+@inject NavigationManager navigationManager
+@inject IMostrarMensajes mostrarMensajes
+
+@if (model == null)
+{
+    <text>Cargando...</text>
+}
+else
+{
+    <h2>@model.persona.Nombre | (@model.persona.FechaNacimiento.Value.ToString("yyyy"))</h2>
+    <div style="display: flex;">
+            <MostrarMarkdown ContenidoMarkdown="@model.persona.Biografia"></MostrarMarkdown>
+    </div>
+    <div style="margin-top: 10px;">
+        <h3>Peliculas en las que participa</h3>
+        <div style="display: flex; flex-direction: column">
+            @foreach (var pelicula in model.Pelicula)
+            {
+                <div style="margin-bottom: 2px;">
+                    <span style="display:inline-block;width: 200px;">Titulo: @pelicula.Titulo</span>
+                    <span style="display:inline-block;width: 400px;">Fecha Lanzamiento: @pelicula.Lanzamiento</span>
+                </div>
+            }
+        </div>
+    </div>
+ }
+
+@code {
+    [Parameter] public int PersonaId { get; set; }
+    private PersonaVisualizarDTO model;
+    protected async override Task OnInitializedAsync()
+    {
+        var responseHttp = await repositorio.GetData<PersonaVisualizarDTO>($"api/personas/ver/{PersonaId}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("");
+            }
+            else
+            {
+                var mensajeError = await responseHttp.GetBody();
+                await mostrarMensajes.MostrarMensajesError(mensajeError);
+            }
+        }
+        else
+        {
+            model = responseHttp.Response;
+        }
+    }
+}

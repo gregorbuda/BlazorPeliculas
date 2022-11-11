@@ -1,0 +1,39 @@
+﻿@inject IRepositoriocs repositorio
+@inject IMostrarMensajes mostrarMensajes
+
+<ListadoGenerico Listado="cines">
+    <HayRegistrosCompleto>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Cine</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in cines)
+                {
+                    <tr>
+                        <td>
+                            @item.Nombre
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </HayRegistrosCompleto>
+</ListadoGenerico>
+
+@code {
+    [Parameter] public List<CineDto> cines { get; set; }
+
+    //protected async override Task OnInitializedAsync()
+    //{
+    //    await Cargar();
+    //}
+
+    //private async Task Cargar()
+    //{
+    //    var responseHttp = await repositorio.Get<List<Cine>>($"api/Cines/{PeliculaId}");
+    //    cines = responseHttp.Response;
+    //}
+}

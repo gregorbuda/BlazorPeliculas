@@ -8,7 +8,8 @@
 @if (MostrarFormulario)
 {
     <FormularioPeliculas Pelicula="Pelicula" OnValidSubmit="Crear"
-                     GenerosNoSeleccionados="GenerosNoSeleccionados">
+                     GenerosNoSeleccionados="GenerosNoSeleccionados"
+                        CinesNoSeleccionados = "CinesNoSeleccionados">
     </FormularioPeliculas>
 }
 else
@@ -20,11 +21,14 @@ else
     private bool MostrarFormulario { get; set; } = false;
     private Pelicula Pelicula = new Pelicula();
     private List<Genero> GenerosNoSeleccionados = new List<Genero>();
+    private List<Cine> CinesNoSeleccionados = new List<Cine>();
 
     protected async override Task OnInitializedAsync()
     {
         var responseHttp = await repositorio.Get<List<Genero>>("api/generos");
+        var responseHttpCines = await repositorio.Get<List<Cine>>("api/cines");
         GenerosNoSeleccionados = responseHttp.Response.ToList();
+        CinesNoSeleccionados = responseHttpCines.Response.ToList();
         MostrarFormulario = true;
     }
 

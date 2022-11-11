@@ -1,14 +1,15 @@
 ﻿@page "/peliculas/buscar"
-@inject IRepositoriocs repositorio;
+@inject IRepositoriocs repositorio
+@inject NavigationManager navigationManager
 
-<h3>Filtro Peliculas</h3>
+<h3>Filtro Películas</h3>
 
 <div class="form-inline">
     <div class="form-group mb-2">
-        <label for="titulo" class="sr-only">  Título  </label>
+        <label for="titulo" class="sr-only">Título</label>
         <input @bind-value="titulo" @bind-value:event="oninput"
                @onkeypress="@((KeyboardEventArgs e) => TituloKeyPress(e))"
-               type="text" class="form-control" id="titulo" placeholder="Titulo pelicula" />
+               type="text" class="form-control" id="titulo" placeholder="Título Película" />
     </div>
     <div class="form-group mx-sm-3 mb-2">
         <select class="form-control" @bind="generoSeleccionado">
@@ -20,57 +21,160 @@
         </select>
     </div>
     <div class="form-group mx-sm-3 mb-2">
-        <input type="checkbox" class="form-check-input" id="estrenos" @bind="@futurosEstrenos" />
-        <label class="form-check-label" for="estrenos">  Futuros Estrenos  </label>
+        <input type="checkbox" class="form-check-input" id="estrenos" @bind="futurosEstrenos" />
+        <label class="form-check-label" for="estrenos">
+            Futuros Estrenos
+        </label>
     </div>
     <div class="form-group mx-sm-3 mb-2">
-        <input type="checkbox" class="form-check-input" id="cartelera" @bind="@enCartelera" />
-        <label class="form-check-label" for="cartelera">  En Cartelera  </label>
+        <input type="checkbox" class="form-check-input" id="cartelera" @bind="enCartelera" />
+        <label class="form-check-label" for="cartelera">
+            En Cartelera
+        </label>
     </div>
     <div class="form-group mx-sm-3 mb-2">
-        <input type="checkbox" class="form-check-input" id="votadas" @bind="@masVotadas" />
-        <label class="form-check-label" for="votadas">  Mas Votadas  </label>
+        <input type="checkbox" class="form-check-input" id="masVotadas" @bind="masVotadas" />
+        <label class="form-check-label" for="masVotadas">
+            Más Votadas
+        </label>
     </div>
-    <button class="btn btn-primary mb-2" type="button" @onclick="CargarNuevasPeliculas"> Filtrar</button>
-    <button class="btn btn-danger mb-2" type="button" @onclick="LimpiarOnClick"> Limpiar</button>
+
+    <button type="button" class="btn btn-primary mb-2 mx-sm-3" @onclick="CargarNuevasPeliculas">Filtrar</button>
+    <button type="button" class="btn btn-danger mb-2" @onclick="LimpiarOnClick">Limpiar</button>
 </div>
 
-    <ListadoPeliculas Peliculas="peliculas"> </ListadoPeliculas>
+<ListadoPeliculas Peliculas="Peliculas"></ListadoPeliculas>
+
+<Paginacion PaginaActual="paginaActual" PaginasTotales="paginasTotales" 
+            PaginaSeleccionada="PaginaSeleccionada" />
 
 @code {
-    private List<Pelicula> peliculas = new List<Pelicula>();
+    private List<Pelicula> Peliculas;
     string titulo = "";
-    string generoSeleccionado = "";
-    private List<Genero> generos = new List<Genero>();
+    string generoSeleccionado = "0";
     private bool futurosEstrenos = false;
     private bool enCartelera = false;
     private bool masVotadas = false;
+    private List<Genero> generos = new List<Genero>();
+    Dictionary<string, string> queryStringsDict = new Dictionary<string, string>();
+    private int paginaActual = 1;
+    private int paginasTotales;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        peliculas = repositorio.ObtenerPeliculas();
+        await ObtenerGeneros();
+
+        var url = navigationManager.Uri;
+
+        var queries = navigationManager.ObtenerQueryStrings(url);
+
+        if (queries == null)
+        {
+            await RealizarBusqueda(string.Empty);
+        }
+        else
+        {
+            queryStringsDict = queries;
+            LlenarCampos();
+            var queryStrings = url.Split(new string[] { "?" }, StringSplitOptions.None)[1];
+            await RealizarBusqueda(queryStrings);
+        }
     }
 
-    private void CargarNuevasPeliculas() 
+    private void LlenarCampos()
     {
-        peliculas = repositorio.ObtenerPeliculas().Where(x => x.Titulo.ToLower().Contains(titulo.ToLower())).ToList();
+        if (queryStringsDict.ContainsKey("generoid"))
+        {
+            generoSeleccionado = queryStringsDict["generoid"];
+        }
+
+        if (queryStringsDict.ContainsKey("titulo"))
+        {
+            titulo = queryStringsDict["titulo"];
+        }
+
+        if (queryStringsDict.ContainsKey("encartelera"))
+        {
+            bool.TryParse(queryStringsDict["encartelera"], out enCartelera);
+        }
+
+        if (queryStringsDict.ContainsKey("estrenos"))
+        {
+            bool.TryParse(queryStringsDict["estrenos"], out futurosEstrenos);
+        }
+
+        if (queryStringsDict.ContainsKey("masvotadas"))
+        {
+            bool.TryParse(queryStringsDict["masvotadas"], out masVotadas);
+        }
+
+        if (queryStringsDict.ContainsKey("pagina"))
+        {
+            int.TryParse(queryStringsDict["pagina"], out paginaActual);
+        }
     }
 
-    private void LimpiarOnClick()
+    private async Task PaginaSeleccionada(int pagina)
     {
-        peliculas = repositorio.ObtenerPeliculas();
+        paginaActual = pagina;
+        await CargarNuevasPeliculas();
+    }
+
+    private async Task ObtenerGeneros()
+    {
+        var httpResponse = await repositorio.Get<List<Genero>>("api/generos");
+        generos = httpResponse.Response;
+    }
+
+    private async Task TituloKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await CargarNuevasPeliculas();
+        }
+    }
+
+    private async Task CargarNuevasPeliculas()
+    {
+        var queryStrings = GenerarQueryStrings();
+        navigationManager.NavigateTo("/peliculas/buscar?" + queryStrings);
+        await RealizarBusqueda(queryStrings);
+    }
+
+    private async Task RealizarBusqueda(string queryStrings)
+    {
+        var httpResponse = await repositorio.Get<List<Pelicula>>("api/peliculas/filtrar?" + queryStrings);
+        paginasTotales = int.Parse(httpResponse.HttpResponseMessage.Headers.GetValues("totalPaginas").FirstOrDefault());
+        Peliculas = httpResponse.Response;
+    }
+
+    private string GenerarQueryStrings()
+    {
+        if (queryStringsDict == null) { queryStringsDict = new Dictionary<string, string>(); }
+        queryStringsDict["generoid"] = generoSeleccionado;
+        queryStringsDict["titulo"] = titulo;
+        queryStringsDict["encartelera"] = enCartelera.ToString();
+        queryStringsDict["estrenos"] = futurosEstrenos.ToString();
+        queryStringsDict["masvotadas"] = masVotadas.ToString();
+        queryStringsDict["pagina"] = paginaActual.ToString();
+
+        var valoresPorDefecto = new List<string>() { "false", "", "0" };
+
+        // generoid=7&titulo=spider ...
+
+        return string.Join("&", queryStringsDict
+            .Where(x => !valoresPorDefecto.Contains(x.Value.ToLower()))
+            .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
+    }
+
+    private async Task LimpiarOnClick()
+    {
         titulo = "";
         generoSeleccionado = "0";
         futurosEstrenos = false;
         enCartelera = false;
         masVotadas = false;
-    }
-
-    private void TituloKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter")
-        {
-            CargarNuevasPeliculas();
-        }
+        paginaActual = 1;
+        await CargarNuevasPeliculas();
     }
 }
