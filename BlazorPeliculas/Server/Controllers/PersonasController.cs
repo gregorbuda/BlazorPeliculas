@@ -18,11 +18,12 @@ namespace BlazorPeliculas.Server.Controllers
     public class PersonasController : ControllerBase
     {
         private readonly ApplicationDbContext context;
-        private readonly IAlmacenadorDeArchivos almacenadorDeArchivos;
+        private readonly IAlmacenadorArchivos almacenadorDeArchivos;
         private readonly IMapper mapper;
+        private readonly string contenedor = "personas";
 
         public PersonasController(ApplicationDbContext context,
-        IAlmacenadorDeArchivos almacenadorDeArchivos,
+        IAlmacenadorArchivos almacenadorDeArchivos,
         IMapper mapper)
         {
             this.context = context;
@@ -86,7 +87,7 @@ namespace BlazorPeliculas.Server.Controllers
             {
                 var fotoImagen = Convert.FromBase64String(persona.Foto);
                 personaDB.Foto = await almacenadorDeArchivos.EditarArchivo(fotoImagen,
-                    "jpg", "personas", personaDB.Foto);
+                    "jpg", contenedor, personaDB.Foto);
             }
 
             await context.SaveChangesAsync();

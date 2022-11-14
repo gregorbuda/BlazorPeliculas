@@ -21,12 +21,12 @@ else
     private bool MostrarFormulario { get; set; } = false;
     private Pelicula Pelicula = new Pelicula();
     private List<Genero> GenerosNoSeleccionados = new List<Genero>();
-    private List<Cine> CinesNoSeleccionados = new List<Cine>();
+    private List<CineDto> CinesNoSeleccionados = new List<CineDto>();
 
     protected async override Task OnInitializedAsync()
     {
         var responseHttp = await repositorio.Get<List<Genero>>("api/generos");
-        var responseHttpCines = await repositorio.Get<List<Cine>>("api/cines");
+        var responseHttpCines = await repositorio.Get<List<CineDto>>("api/cines");
         GenerosNoSeleccionados = responseHttp.Response.ToList();
         CinesNoSeleccionados = responseHttpCines.Response.ToList();
         MostrarFormulario = true;

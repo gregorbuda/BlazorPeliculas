@@ -13,5 +13,7 @@ namespace BlazorPeliculas.Shared.DTOs
         public List<Persona> Actores { get; set; }
         public List<Genero> GenerosSeleccionados { get; set; }
         public List<Genero> GenerosNoSeleccionados { get; set; }
+        public List<CineDto> CinesSeleccionados { get; set; }
+        public List<CineDto> CinesNoSeleccionados { get; set; }
     }
 }

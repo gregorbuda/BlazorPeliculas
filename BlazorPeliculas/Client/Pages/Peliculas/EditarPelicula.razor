@@ -15,7 +15,9 @@ else
     <FormularioPeliculas Pelicula="Pelicula" OnValidSubmit="Editar"
                          ActoresSeleccionados="ActoresSeleccionados"
                          GenerosNoSeleccionados="GenerosNoSeleccionados"
-                         GenerosSeleccionados="GenerosSeleccionados"></FormularioPeliculas>
+                         CinesSeleccionados="CinesSeleccionados"
+                         CinesNoSeleccionados="CinesNoSeleccionados">
+                     </FormularioPeliculas>
 }
 
 @code {
@@ -23,6 +25,8 @@ else
     Pelicula Pelicula;
     private List<Genero> GenerosSeleccionados = new List<Genero>();
     private List<Genero> GenerosNoSeleccionados = new List<Genero>();
+    private List<CineDto> CinesSeleccionados = new List<CineDto>();
+    private List<CineDto> CinesNoSeleccionados = new List<CineDto>();
     private List<Persona> ActoresSeleccionados { get; set; }
 
     protected async override Task OnInitializedAsync()
@@ -47,6 +51,8 @@ else
             ActoresSeleccionados = model.Actores;
             GenerosNoSeleccionados = model.GenerosNoSeleccionados;
             GenerosSeleccionados = model.GenerosSeleccionados;
+            CinesSeleccionados = model.CinesSeleccionados;
+            CinesNoSeleccionados = model.CinesNoSeleccionados;
             Pelicula = model.Pelicula;
         }
     }

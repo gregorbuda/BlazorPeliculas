@@ -24,11 +24,11 @@ namespace BlazorPeliculas.Server.Controllers
 
         [HttpGet]
 
-        public async Task<ActionResult<List<Cine>>> Get()
+        public async Task<ActionResult<List<CineDto>>> Get()
         {
 
             var cine = await context.Cines.Select(b =>
-            new Cine()
+            new CineDto()
             {
                 Id = b.Id,
                 Nombre = b.Nombre

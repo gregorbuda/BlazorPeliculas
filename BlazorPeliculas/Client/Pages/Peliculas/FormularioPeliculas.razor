@@ -79,8 +79,8 @@
     [Parameter] public List<Genero> GenerosSeleccionados { get; set; } = new List<Genero>();
     [Parameter] public List<Genero> GenerosNoSeleccionados { get; set; } = new List<Genero>();
     [Parameter] public List<Persona> ActoresSeleccionados { get; set; } = new List<Persona>();
-    [Parameter] public List<Cine> CinesSeleccionados { get; set; } = new List<Cine>();
-    [Parameter] public List<Cine> CinesNoSeleccionados { get; set; } = new List<Cine>();
+    [Parameter] public List<CineDto> CinesSeleccionados { get; set; } = new List<CineDto>();
+    [Parameter] public List<CineDto> CinesNoSeleccionados { get; set; } = new List<CineDto>();
 
     private List<SelectorMultipleModel> SeleccionadosGeneros { get; set; } = new List<SelectorMultipleModel>();
     private List<SelectorMultipleModel> NoSeleccionadosGeneros { get; set; } = new List<SelectorMultipleModel>();

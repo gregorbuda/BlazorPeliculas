@@ -33,6 +33,7 @@ namespace BlazorPeliculas.Server
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnnection")));
+            services.AddScoped<IAlmacenadorArchivos, AlmacenadorArchivosAzStorage>();
 
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()

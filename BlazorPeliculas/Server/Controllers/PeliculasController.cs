@@ -20,12 +20,13 @@ namespace BlazorPeliculas.Server.Controllers
     public class PeliculasController : ControllerBase
     {
         private readonly ApplicationDbContext context;
-        private readonly IAlmacenadorDeArchivos almacenadorDeArchivos;
+        private readonly IAlmacenadorArchivos almacenadorDeArchivos;
         private readonly IMapper mapper;
         private readonly UserManager<IdentityUser> userManager;
+        private readonly string contenedor = "peliculas";
 
         public PeliculasController(ApplicationDbContext context,
-        IAlmacenadorDeArchivos almacenadorDeArchivos,
+        IAlmacenadorArchivos almacenadorDeArchivos,
         IMapper mapper,
         UserManager<IdentityUser> userManager)
         {
@@ -152,14 +153,44 @@ namespace BlazorPeliculas.Server.Controllers
 
             var peliculaVisualizarDTO = peliculaActionResult.Value;
             var generosSeleccionadosIds = peliculaVisualizarDTO.Generos.Select(x => x.Id).ToList();
+            var cineSeleccionadosIds = peliculaVisualizarDTO.Cines.Select(x => x.Id).ToList();
             var generosNoSeleccionados = await context.genero
                 .Where(x => !generosSeleccionadosIds.Contains(x.Id))
                 .ToListAsync();
+
+            List<CineDto> ListCine = new List<CineDto>();
+
+            var cines = await context.Cines.Select(b =>
+            new Cine()
+            {
+                Id = b.Id,
+                Nombre = b.Nombre
+            }).ToListAsync();
+
+
+            foreach (var cine in cines)
+            {
+                var listacine = await context.Cines.Select(b =>
+                new CineDto()
+                {
+                    Id = b.Id,
+                    Nombre = b.Nombre
+                }).Where(x => x.Id == cine.Id).FirstOrDefaultAsync();
+
+                ListCine.Add(listacine);
+            };
+
+
+            ListCine = ListCine
+            .Where(x => !cineSeleccionadosIds.Contains(x.Id))
+            .ToList();
 
             var model = new PeliculaActualizacionDTO();
             model.Pelicula = peliculaVisualizarDTO.Pelicula;
             model.GenerosNoSeleccionados = generosNoSeleccionados;
             model.GenerosSeleccionados = peliculaVisualizarDTO.Generos;
+            model.CinesNoSeleccionados = ListCine;
+            model.CinesSeleccionados = peliculaVisualizarDTO.Cines;
             model.Actores = peliculaVisualizarDTO.Actores;
             return model;
         }
@@ -180,10 +211,10 @@ namespace BlazorPeliculas.Server.Controllers
                 {
                     var posterImagen = Convert.FromBase64String(pelicula.Poster);
                     peliculaDB.Poster = await almacenadorDeArchivos.EditarArchivo(posterImagen,
-                        "jpg", "peliculas", peliculaDB.Poster);
+                        "jpg", contenedor, peliculaDB.Poster);
                 }
 
-                await context.Database.ExecuteSqlInterpolatedAsync($"delete from generoPeliculas WHERE PeliculaId = {pelicula.Id}; delete from peliculaActor where PeliculaId = {pelicula.Id}");
+                await context.Database.ExecuteSqlInterpolatedAsync($"delete from generoPeliculas WHERE PeliculaId = {pelicula.Id}; delete from peliculaActor where PeliculaId = {pelicula.Id}; delete from CinesPeliculas WHERE PeliculaId = {pelicula.Id}");
 
                 if (pelicula.peliculaActor != null)
                 {
@@ -195,6 +226,7 @@ namespace BlazorPeliculas.Server.Controllers
 
                 peliculaDB.peliculaActor = pelicula.peliculaActor;
                 peliculaDB.GenerosPelicula = pelicula.GenerosPelicula;
+                peliculaDB.CinePelicula = pelicula.CinePelicula;
 
                 await context.SaveChangesAsync();
                 return NoContent();
@@ -212,7 +244,7 @@ namespace BlazorPeliculas.Server.Controllers
             if (!string.IsNullOrWhiteSpace(pelicula.Poster))
             {
                 var Posterpelicula = Convert.FromBase64String(pelicula.Poster);
-                pelicula.Poster = await almacenadorDeArchivos.GuardarArchivo(Posterpelicula, "jpg", "peliculas");
+                pelicula.Poster = await almacenadorDeArchivos.GuardarArchivo(Posterpelicula, "jpg", contenedor);
             }
 
             if (pelicula.peliculaActor != null)
