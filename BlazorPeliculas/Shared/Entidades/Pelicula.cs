@@ -29,8 +29,6 @@ namespace BlazorPeliculas.Shared.Entidades
 
         public List<PeliculaActor> peliculaActor { get; set; }
 
-        public List<Cine> cines { get; set; }
-
         public string TituloCortado 
         { 
             get

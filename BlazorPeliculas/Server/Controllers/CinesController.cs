@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -63,9 +64,18 @@ namespace BlazorPeliculas.Server.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
         public async Task<ActionResult<int>> Post(Cine cine)
         {
-            context.Add(cine);
-            await context.SaveChangesAsync();
-            return cine.Id;
+            try
+            {
+                context.Add(cine);
+                await context.SaveChangesAsync();
+                return cine.Id;
+            }
+            catch(Exception ex)
+            {
+
+                return 1;
+            }
+
         }
 
         [HttpPut]
